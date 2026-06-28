@@ -1,6 +1,14 @@
 import streamlit as st
 import pandas as pd
 import preprocessor,helper
+import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+st.set_page_config(
+    page_title="Olympics Analysis",
+    layout="wide"
+)
 
 df = pd.read_csv('athlete_events.csv')
 region_df = pd.read_csv('noc_regions.csv')
@@ -64,3 +72,41 @@ if user_menu == "Overall Analysis":
     with col3:
         st.header("Nations")
         st.title(Nations)
+
+    nations_over_time = helper.participating_nation_over_time(df)
+    fig = px.line(nations_over_time, x="Year", y="count")
+    fig.update_layout(
+    yaxis_title="Number of Nations",
+    xaxis_title="Year"
+    )
+    st.title("Participating Nations Over the Years")
+    st.plotly_chart(fig)
+
+    events_over_time = helper.no_of_events_over_time(df)
+    fig = px.line(events_over_time, x="Year", y="count")
+    fig.update_layout(
+        yaxis_title="Number of Events",
+        xaxis_title="Year"
+    )
+    st.title("Number of Events Over the Years")
+    st.plotly_chart(fig)
+
+    Athlete_over_time = helper.participating_athlete_over_time(df)
+    fig = px.line(Athlete_over_time, x="Year", y="count")
+    fig.update_layout(
+        yaxis_title="Number of Athletes",
+        xaxis_title="Year"
+    )
+    st.title("Participating Athletes Over the Years")
+    st.plotly_chart(fig)
+
+    st.title("Events in Each Sport Over the Years")
+    fig, ax = plt.subplots(figsize=(20, 20))
+    x = df.drop_duplicates(["Year", "Sport", "Event"])
+    ax = sns.heatmap(x.pivot_table(
+        index="Sport",
+        columns="Year",
+        values="Event",
+        aggfunc="count"
+    ).fillna(0).astype("int"), annot=True)
+    st.pyplot(fig)
