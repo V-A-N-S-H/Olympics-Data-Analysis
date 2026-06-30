@@ -4,6 +4,7 @@ import preprocessor,helper
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.figure_factory as ff
 
 st.set_page_config(
     page_title="Olympics Analysis",
@@ -146,3 +147,54 @@ if user_menu == "Country-wise Analysis":
     st.title("Top 15 athletes of " + selected_country)
     top_athletes = helper.most_successful_athlete_of_country(df, selected_country)
     st.table(top_athletes)
+
+if user_menu == "Athlete-wise Analysis":
+
+    st.title("Distribution of Age")
+    athlete_df = df.drop_duplicates(subset=["Name", "region"])
+
+    x1 = athlete_df["Age"].dropna()
+    x2 = athlete_df[athlete_df["Medal"] == "Gold"]["Age"].dropna()
+    x3 = athlete_df[athlete_df["Medal"] == "Silver"]["Age"].dropna()
+    x4 = athlete_df[athlete_df["Medal"] == "Bronze"]["Age"].dropna()
+
+    fig = ff.create_distplot([x1, x2, x3, x4], ["Age Distribution", "Gold Medalist", "Silver Medalist", "Bronze Medalist"], show_hist=False, show_rug=False)
+    st.plotly_chart(fig)
+
+    st.title("Distribution of Age wrt Sports(Gold Medalist)")
+    famous_sports = ['Baseball', "Judo", "Football", "Athletics",
+                  "Swimming", "Badminton", "Gymnastics",
+                  "Handball", "Weightlifting", "Wrestling",
+                  "Water Polo", "Hockey", "Rowing",
+                  "Shooting", "Boxing", "Taekwondo", "Cycling", "Diving",
+                  "Tennis", "Golf", "Softball", "Archery",
+                  "Volleyball", "Table Tennis", "Rugby Sevens",
+                  "Beach Volleyball", "Rugby", "Polo", "Ice Hockey"]
+    
+    x = []
+    name = []
+    for sport in famous_sports:
+        temp_df = athlete_df[athlete_df["Sport"] == sport]
+        x.append(temp_df[temp_df["Medal"] == "Gold"]["Age"].dropna())
+        name.append(sport)
+
+    fig = ff.create_distplot(x, name, show_hist=False, show_rug=False)
+    st.plotly_chart(fig)
+
+    st.title("Weight vs Height of Athletes")
+    sport = df["Sport"].unique().tolist()
+    sport.sort()
+    sport.insert(0, "Overall")
+
+    selected_sport = st.selectbox("Select a Sport", sport)
+
+    temp_df = helper.weight_vs_height(df, selected_sport)
+
+    fig, ax = plt.subplots()
+    ax = sns.scatterplot(x="Weight", y="Height", hue="Medal", style="Sex", data=temp_df, size=70)
+    st.pyplot(fig)
+
+    st.title("Men vs Women Participation Over the Years")
+    final = helper.men_vs_women(df)
+    fig = px.line(final, x="Year", y=["Male", "Female"])
+    st.plotly_chart(fig)
