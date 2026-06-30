@@ -58,3 +58,20 @@ def participating_athlete_over_time(df):
     athletes_over_time = df.drop_duplicates(["Year", "Name"])["Year"].value_counts().reset_index().sort_values("Year")
 
     return athletes_over_time
+
+
+def most_successful_athlete(df, sport):
+    temp_df = df.dropna(subset=["Medal"])
+
+    if sport != "Overall":
+        temp_df = temp_df[temp_df["Sport"] == sport]
+
+    x = temp_df["Name"].value_counts().reset_index()
+    x.columns = ["Name", "Medals"]
+
+    return (
+        x.head(10)
+        .merge(df, on="Name", how="left")
+        [["Name", "Medals", "Sport", "region"]]
+        .drop_duplicates("Name")
+    )

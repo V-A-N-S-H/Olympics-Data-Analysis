@@ -39,7 +39,7 @@ if user_menu == "Medal Tally":
     if selected_year != "Overall" and selected_country != "Overall":
         st.title(f'Medal Tally in {selected_year} for {selected_country}')
 
-    st.dataframe(medal_tally)
+    st.table(medal_tally)
 
 if user_menu == "Overall Analysis":
     Edition = df['Year'].unique().shape[0] - 1
@@ -110,3 +110,12 @@ if user_menu == "Overall Analysis":
         aggfunc="count"
     ).fillna(0).astype("int"), annot=True)
     st.pyplot(fig)
+
+    st.title("Most Successful Athletes")
+    sport = df["Sport"].unique().tolist()
+    sport.sort()
+    sport.insert(0, "Overall")
+
+    selected_sport = st.selectbox("Select a Sport", sport)
+    x = helper.most_successful_athlete(df, selected_sport)
+    st.table(x)
